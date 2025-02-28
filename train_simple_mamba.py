@@ -152,6 +152,7 @@ def train(rank, args, cfg):
             clean_mag = torch.autograd.Variable(clean_mag.to(device, non_blocking=True))
             clean_pha = torch.autograd.Variable(clean_pha.to(device, non_blocking=True))
             clean_com = torch.autograd.Variable(clean_com.to(device, non_blocking=True))
+            noisy_audio = torch.autograd.Variable(clean_audio.to(device, non_blocking=True))
             noisy_mag = torch.autograd.Variable(noisy_mag.to(device, non_blocking=True))
             noisy_pha = torch.autograd.Variable(noisy_pha.to(device, non_blocking=True))
             one_labels = torch.ones(batch_size).to(device, non_blocking=True)
