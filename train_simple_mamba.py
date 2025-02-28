@@ -147,7 +147,7 @@ def train(rank, args, cfg):
         for i, batch in enumerate(train_loader):
             if rank == 0:
                 start_b = time.time()
-            clean_audio, clean_mag, clean_pha, clean_com, noisy_mag, noisy_pha, noisy_audio = batch # [B, 1, F, T], F = nfft // 2+ 1, T = nframes
+            clean_audio, clean_mag, clean_pha, clean_com, noisy_audio, noisy_mag, noisy_pha = batch # [B, 1, F, T], F = nfft // 2+ 1, T = nframes
             clean_audio = torch.autograd.Variable(clean_audio.to(device, non_blocking=True))
             clean_mag = torch.autograd.Variable(clean_mag.to(device, non_blocking=True))
             clean_pha = torch.autograd.Variable(clean_pha.to(device, non_blocking=True))
