@@ -52,27 +52,26 @@ def get_noisy_test_sample(noisy_path,cfg):
     return (noisy_audio, noisy_mag, noisy_pha)
 
 def get_clean_phase(clean_path,cfg):
-    clean_audion,clean_mag,clean_phase = get_noisy_test_sample(clean_path,cfg)
+    _,_,clean_phase = get_noisy_test_sample(clean_path,cfg)
     return clean_phase
 
 def compute_rms(signal):
-    return torch.sqrt(torch.mean(signal ** 2) + 1e-8)  # Add small value to avoid NaN
+    return torch.sqrt(torch.mean(signal ** 2) + 10**(-8))  # Add small value to avoid NaN
 
-def normalize_energy(enhanced, clean):
-    rms_clean = compute_rms(clean)
+def normalize_energy(enhanced):
     rms_enhanced = compute_rms(enhanced)
     
     # Avoid division by zero
-    scale_factor = rms_clean / (rms_enhanced + 1e-8)  
+    scale_factor = 1 / (rms_enhanced +  10**(-8))  
     return enhanced * scale_factor
 
 #inputs
-output_dir = "./EnhancedSamples/SEMamba_basic_log1p/"
-model_path = "./exp/SEMamba_basic_log1p/g_00042000.pth"
+output_dir = "./EnhancedSamples/SEMamba_basic_4_m_block/"
+model_path = "./exp/SEMamba_basic_4_m_block/g_00023000.pth"
 clean_path_dir = "./EnhancedSamples/ref_clean/"
 noisy_dir = "./EnhancedSamples/ref_noisy/"
 
-noisy_files = ["p232_013.wav","p232_095.wav","p232_121.wav","p232_151.wav","p232_162.wav"]
+noisy_files = ["p232_005.wav","p232_013.wav","p232_095.wav","p232_121.wav","p232_151.wav","p232_162.wav"]
 
 #set the model
 device = torch.device('cuda:{:d}'.format(rank))
@@ -102,7 +101,7 @@ for noisy_file in noisy_files:
 
     #test with clean phase:
     audio_g = mag_phase_istft(mag_g, noisy_pha, n_fft, hop_size, win_size, compress_factor)
-    audio_g_norm = normalize_energy(audio_g, clean_path)
+    audio_g_norm = normalize_energy(audio_g)
 
     # Example: PyTorch tensor containing audio data
     sample_rate = 16000  # Adjust to your sample rate
@@ -120,7 +119,7 @@ for noisy_file in noisy_files:
     clean_pha = get_clean_phase(clean_path,cfg)
     clean_pha = clean_pha.to(device)
     audio_g_clean_pha = mag_phase_istft(mag_g, clean_pha, n_fft, hop_size, win_size, compress_factor)
-    audio_g_clean_pha_norm = normalize_energy(audio_g, clean_path)
+    audio_g_clean_pha_norm = normalize_energy(audio_g)
 
     # Example: PyTorch tensor containing audio data
     sample_rate = 16000  # Adjust to your sample rate
