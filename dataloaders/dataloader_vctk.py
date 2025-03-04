@@ -131,6 +131,11 @@ class VCTKDemandDataset(torch.utils.data.Dataset):
         clean_mag, clean_pha, clean_com = mag_phase_stft(clean_audio, self.n_fft, self.hop_size, self.win_size, self.compress_factor)
         noisy_mag, noisy_pha, noisy_com = mag_phase_stft(noisy_audio, self.n_fft, self.hop_size, self.win_size, self.compress_factor)
 
+        #safe log1p
+        noisy_mag = torch.nan_to_num(noisy_mag, nan=0.0)  # Replace NaNs with 0
+        noisy_mag = torch.clamp(noisy_mag, min=-0.999)    # Ensure valid input range
+        noisy_mag=  torch.log1p(noisy_mag)
+
         return (clean_audio.squeeze(), clean_mag.squeeze(), clean_pha.squeeze(), clean_com.squeeze(), noisy_audio.squeeze(), noisy_mag.squeeze(), noisy_pha.squeeze())
 
     def __len__(self):
