@@ -5,7 +5,8 @@ import json
 import torch
 import librosa
 from models.stfts import mag_phase_stft, mag_phase_istft
-from models.generator import SEMamba
+from models.generator_mamba_basic import BasicMambaGenerator
+from models.generator_mamba_fusion import FusionMambaGenerator
 from models.pcs400 import cal_pcs
 import soundfile as sf
 
@@ -23,8 +24,8 @@ def inference(args, device):
     n_fft, hop_size, win_size = cfg['stft_cfg']['n_fft'], cfg['stft_cfg']['hop_size'], cfg['stft_cfg']['win_size']
     compress_factor = cfg['model_cfg']['compress_factor']
     sampling_rate = cfg['stft_cfg']['sampling_rate']
-
-    model = SEMamba(cfg).to(device)
+    generator = BasicMambaGenerator(cfg).to(device)
+    model = FusionMambaGenerator(generator,cfg).to(device)
     state_dict = torch.load(args.checkpoint_file, map_location=device)
     model.load_state_dict(state_dict['generator'])
 
@@ -51,8 +52,8 @@ def inference(args, device):
             norm_factor = torch.sqrt(len(noisy_wav) / torch.sum(noisy_wav ** 2.0)).to(device)
             noisy_wav = (noisy_wav * norm_factor).unsqueeze(0)
             noisy_amp, noisy_pha, noisy_com = mag_phase_stft(noisy_wav, n_fft, hop_size, win_size, compress_factor)
-            amp_g, pha_g, com_g = model(noisy_amp, noisy_pha)
-            audio_g = mag_phase_istft(amp_g, pha_g, n_fft, hop_size, win_size, compress_factor)
+            amp_g = model(noisy_wav,noisy_amp)
+            audio_g = mag_phase_istft(amp_g, noisy_pha, n_fft, hop_size, win_size, compress_factor)
             audio_g = audio_g / norm_factor
 
             output_file = os.path.join(args.output_folder, fname)
@@ -67,9 +68,9 @@ def inference(args, device):
 def main():
     print('Initializing Inference Process..')
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_folder', default='/mnt/e/Corpora/noisy_vctk/noisy_testset_wav_16k/')
-    parser.add_argument('--output_folder', default='results')
-    parser.add_argument('--config', default='results')
+    parser.add_argument('--input_folder', default='./EnhancedSamples/ref_noisy/')
+    parser.add_argument('--output_folder', default='./EnhancedSamples/SEMamba_fusion_3_09_PESQ/')
+    parser.add_argument('--config', default='./recipes/SEMamba_fusion/SEMamba_fusion.yaml')
     parser.add_argument('--checkpoint_file', required=True)
     parser.add_argument('--post_processing_PCS', default=False)
     args = parser.parse_args()
