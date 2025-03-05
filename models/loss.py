@@ -143,3 +143,22 @@ def pesq_score(utts_r, utts_g, cfg):
     pesq_score = np.mean(pesq_scores)
     return pesq_score
 
+def si_sdr(denoised, clean, eps=10**(-8)):
+    """
+    Evaluate Scale-Invariant single-distortion-ratio between estimated and reference signals in time-domain.
+    Args:
+        denoised: Tensor of shape (batch, time)
+        clean: Tensor of shape (batch, time)
+        eps: Small value to avoid division by zero
+    
+    Returns:
+        SI-SDR in dB
+    """
+    reference_energy = torch.sum(clean ** 2, dim=-1, keepdim=True) + eps
+    scale = torch.sum(denoised * clean, dim=-1, keepdim=True) / reference_energy
+    target = scale * clean
+    noise = denoised - target
+    si_sdr_value = 10 * torch.log10((torch.sum(target ** 2, dim=-1) + eps) / 
+                                    (torch.sum(noise ** 2, dim=-1) + eps))
+    si_sdr = -si_sdr_value #for loss function - the lower the better
+    return si_sdr.mean()

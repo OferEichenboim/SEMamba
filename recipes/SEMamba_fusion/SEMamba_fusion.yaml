@@ -42,6 +42,7 @@ training_cfg:
     complex: 0.1
     time: 0.2
     consistancy: 0.1
+    si_sdr: 0.3
   use_PCS400: False  # Use PCS or not
 
 # STFT Configuration
@@ -69,3 +70,5 @@ model_cfg:
   conv_kernel: 5 #size of convolution kernel in time domain feature extraction
   max_pool_kernel: 51 #size of smoothing kernel in max pool time domain feature extraction  
   fusion_type: conv #choose linear\conv for the fusion between time and frequency
+
+  loss_si_sdr*cfg["training_cfg"]["loss"]["si_sdr"]

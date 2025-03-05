@@ -17,7 +17,7 @@ from dataloaders.dataloader_vctk import VCTKDemandDataset
 from models.stfts import mag_phase_stft, mag_phase_istft
 from models.generator_mamba_basic import BasicMambaGenerator
 from models.generator_mamba_fusion import FusionMambaGenerator
-from models.loss import pesq_score, phase_losses
+from models.loss import pesq_score, phase_losses, si_sdr
 from models.discriminator import MetricDiscriminator, batch_pesq
 from utils.util import (
     load_ckpts, load_optimizer_states, save_checkpoint,
@@ -210,6 +210,7 @@ def train(rank, args, cfg):
             # Metric Loss
             metric_g = discriminator(clean_mag, mag_g)
             loss_metric = F.mse_loss(metric_g.flatten(), one_labels)
+            loss_si_sdr = si_sdr(audio_g, clean_audio)
             # Consistancy Loss
             #_, _, rec_com = mag_phase_stft(audio_g, n_fft, hop_size, win_size, compress_factor, addeps=True)
             #loss_con = F.mse_loss(com_g, rec_com) * 2
@@ -217,7 +218,8 @@ def train(rank, args, cfg):
             loss_gen_all = (
                 loss_metric * cfg['training_cfg']['loss']['metric'] +
                 loss_mag * cfg['training_cfg']['loss']['magnitude'] +
-                loss_time * cfg['training_cfg']['loss']['time'] 
+                loss_time * cfg['training_cfg']['loss']['time'] +
+                loss_si_sdr*cfg["training_cfg"]["loss"]["si_sdr"]
             )
                 #loss_pha * cfg['training_cfg']['loss']['phase'] +
                 #loss_com * cfg['training_cfg']['loss']['complex'] +
