@@ -7,6 +7,7 @@ import torchaudio
 import librosa
 import random
 from models.generator_mamba_basic import BasicMambaGenerator
+from models.generator_mamba_fusion import FusionMambaGenerator
 from utils.util import (
     load_ckpts, load_optimizer_states, save_checkpoint,
     build_env, load_config, initialize_seed, 
@@ -19,7 +20,7 @@ from models.stfts import mag_phase_stft, mag_phase_istft
 
 
 rank=0
-cfg = load_config("./recipes/SEMamba_basic/SEMamba_basic.yaml")
+cfg = load_config("./recipes/SEMamba_fusion/SEMamba_fusion.yaml")
 n_fft=cfg['stft_cfg']['n_fft']
 hop_size=cfg['stft_cfg']['hop_size']
 win_size=cfg['stft_cfg']['win_size']
@@ -66,8 +67,8 @@ def normalize_energy(enhanced):
     return enhanced * scale_factor
 
 #inputs
-output_dir = "./EnhancedSamples/SEMamba_basic_4_m_block/"
-model_path = "./exp/SEMamba_basic_4_m_block/g_00023000.pth"
+output_dir = "./EnhancedSamples/SEMamba_fusion/"
+model_path = "./exp/./SEMamba_fusion//g_00020000.pth"
 clean_path_dir = "./EnhancedSamples/ref_clean/"
 noisy_dir = "./EnhancedSamples/ref_noisy/"
 
@@ -75,7 +76,8 @@ noisy_files = ["p232_005.wav","p232_013.wav","p232_095.wav","p232_121.wav","p232
 
 #set the model
 device = torch.device('cuda:{:d}'.format(rank))
-generator = BasicMambaGenerator(cfg).to(device)
+generator_basic = BasicMambaGenerator(cfg).to(device)
+generator = FusionMambaGenerator(generator_basic,cfg).to(device)
 checkpoint = torch.load(model_path, map_location="cuda" if torch.cuda.is_available() else "cpu")
 if "generator" in checkpoint:
     generator.load_state_dict(checkpoint["generator"])
@@ -92,11 +94,11 @@ for noisy_file in noisy_files:
     noisy_full_path = noisy_dir + noisy_file
 
     noisy_audio, noisy_mag, noisy_pha  = get_noisy_test_sample(noisy_full_path,cfg)
-    noisy_mag, noisy_pha = noisy_mag.to(device), noisy_pha.to(device)
+    noisy_mag, noisy_pha,noisy_audio = noisy_mag.to(device), noisy_pha.to(device),noisy_audio.to(device)
 
     # Forward pass
     with torch.no_grad():  # Disable gradient tracking for inference
-        mag_g = generator(noisy_mag)
+        mag_g = generator(noisy_audio.unsqueeze(0),noisy_mag)
 
 
     #test with clean phase:
