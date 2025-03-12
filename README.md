@@ -1,30 +1,5 @@
-# SEMamba (Accepted to IEEE SLT 2024)
-This is the official implementation of the SEMamba paper.  
-For more details, please refer to: [An Investigation of Incorporating Mamba for Speech Enhancement](https://arxiv.org/abs/2405.06573)
-
----
-
-### NeurIPS 2024 competition : URGENT challenge 2024 ( oral presentation )
-
-- A speech enhancement (SE) challenge aiming to build universal, robust, diverse, and generalizable SE models.
-- The challenge involves diverse distortions, including 
-    - **additive noise**, 
-    - **reverberation**, 
-    - **clipping**,
-    - **bandwidth limitations**,  
-
-    with **all types of sampling frequencies** supported by a single model.
-- Requires handling a large-scale dataset (~1.5 TB) and includes ranking based on **13 metrics** in classes of 
-    - non-intrusive, 
-    - intrusive, 
-    - downstream-task-independent, 
-    - downstream-task-dependent,
-    - subjective  
-
-    SE metrics.
-- Achieved **4th place** among 70 participating teams (>20 teams joined to the final stage).
-- Deliver an oral presentation at the **NeurIPS** 2024 workshop, Vancouver, Canada.
-- **Demo website** **[Live Demo Website](https://roychao19477.github.io/speech-enhancement-demo-2024/)**
+# SEMAMBA - Fusion
+this is the implementation of a Speech enhancement algorithm based on mamba architecture, fused with a time domain feature extraction.
 
 ---
 
@@ -39,20 +14,10 @@ git checkout mamba-2
     * Python >= 3.9
     * CUDA >= 12.0
     * PyTorch == 2.2.2
-
 ## Model
 
-![SEMamba advanced model](imgs/SEMamba_advanced.jpg)
-
 ## Speech Enhancement Results
-VCTK-Demand
-![VCTKDEMAND_Results](imgs/VCTK-Demand.png)
-
-## ASR Word Error Rate
-We have tested the ASR results using OpenAI Whisper on the test set of VoiceBank-DEMAND.
-> The evaluation code will be released in the future.
-
-![VCTKDEMAND WER Results](imgs/vctk_wer.jpg)
+![VoiceBand-Demand results](imgs/resluts.png)
 
 ## Additional Notes
 
@@ -109,41 +74,28 @@ Alternatively, you can directly modify the data paths in `data/train_clean.json`
 ### Step 2: Run the following script to train the model.
 
 ```bash
-sh run.sh
+sh run_mamba_fusion.sh
 ```
 
 Note: You can use `tensorboard --logdir exp/path_to_your_exp/logs` to check your training log
 
 ## Using the Pretrained Model
 
-Modify the `--input_folder` and `--output_folder` parameters in `pretrained.sh` to point to your desired input and output directories. Then, run the script.
+Modify the `--input_folder` and `--output_folder` parameters in `pretrained_fusion.sh` to point to your desired input and output directories. Then, run the script.
 
 ```bash
-sh pretrained.sh
+sh pretrained_fusion.sh
 ```
 
-## Implementing the PCS Method in SEMamba
-There are two methods to implement the PCS (Perceptual Contrast Stretching) method in SEMamba:
-1. Use PCS as Training Target:
-- Run the `sh runPCS.sh` with the yaml configuration `use_PCS400=True`.
-- Use the pretrained model `sh pretrained.sh` without post-processing `--post_processing_PCS False`.
 
-2. Use PCS as Post-Processing:
-- Run the `sh run.sh` with the yaml configuration `use_PCS400=False`.
-- Use the pretrained model `sh pretrained.sh` with post-processing `--post_processing_PCS True`.
+# Basic Mamba model trainign
+```bash
+sh pretrained_basic.sh
+```
 
-## Evaluation
-The evaluation metrics is calculated via: [CMGAN](https://github.com/ruizhecao96/CMGAN/blob/main/src/tools/compute_metrics.py)  
-> The evaluation code will be released in the future.
-
-## Perceptual Contrast Stretching
-The implementation of Perceptual Contrast Stretching (PCS) as discussed in our paper can be found at [PCS400](https://github.com/RoyChao19477/PCS/tree/main/PCS400).
 
 ## References and Acknowledgements
-We would like to express our gratitude to the authors of [MP-SENet](https://github.com/yxlu-0102/MP-SENet/tree/main), [CMGAN](https://github.com/ruizhecao96/CMGAN), [HiFi-GAN](https://github.com/jik876/hifi-gan/blob/master/train.py), and [NSPP](https://github.com/YangAi520/NSPP).
-
-## Citation:
-If you find the paper useful in your research, please cite:  
+we would like to thank to the original SEMamba paper and github repository on which this project is based on.
 ```
 @article{chao2024investigation,
   title={An Investigation of Incorporating Mamba for Speech Enhancement},

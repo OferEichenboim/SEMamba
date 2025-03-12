@@ -341,6 +341,32 @@ def train(rank, args, cfg):
         if rank == 0:
             print('Time taken for epoch {} is {} sec\n'.format(epoch + 1, int(time.time() - start)))
 
+
+
+from scipy.io import wavfile
+import numpy as np
+# For debug purpose only:
+def play_audio_scipy(audio_data, sample_rate=16000):
+    # Normalize audio
+    audio_normalized = audio_data / np.max(np.abs(audio_data))
+    
+    # Write to temporary WAV file
+    import tempfile
+    import os
+    
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_wav:
+        temp_filename = temp_wav.name
+    
+    # Write audio to file
+    wavfile.write(temp_filename, sample_rate, 
+                  np.int16(audio_normalized * 32767))
+    
+    # Play using system command
+    os.system(f'aplay {temp_filename}')
+    
+    # Remove temporary file
+    os.unlink(temp_filename)
+
 # Reference: https://github.com/yxlu-0102/MP-SENet/blob/main/train.py
 def main():
     parser = argparse.ArgumentParser()
