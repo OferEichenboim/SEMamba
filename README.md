@@ -1,6 +1,6 @@
 # SEMAMBA - Fusion
-this is the implementation of a Speech enhancement algorithm based on mamba architecture, fused with a time domain feature extraction.
-
+This is the implementation of a our Speech enhancement algorithm based on mamba architecture, fused with a time domain feature extraction.
+This is the final project for the Deep Learning course doen in TAU in 2025.
 ---
 
 ⚠️  Notice: If you encounter CUDA-related issues while using the Mamba-1 framework, we suggest using the Mamba-2 framework (available in the mamba-2 branch).  
